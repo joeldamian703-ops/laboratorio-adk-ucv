@@ -1,4 +1,4 @@
-name: Pruebas automatizadas
+name: Pruebas y análisis de calidad
 
 on:
   push:
@@ -11,12 +11,14 @@ permissions:
 
 jobs:
   tests:
-    name: Pytest y cobertura
+    name: Pytest, cobertura y SonarQube
     runs-on: ubuntu-latest
 
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Configurar Python
         uses: actions/setup-python@v7
@@ -29,5 +31,10 @@ jobs:
       - name: Instalar dependencias
         run: poetry install --no-root
 
-      - name: Ejecutar pruebas
+      - name: Ejecutar pruebas y cobertura
         run: poetry run pytest -v --cov=agente_ucv --cov-report=term-missing --cov-report=xml
+
+      - name: Analizar con SonarQube Cloud
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
